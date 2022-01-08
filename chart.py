@@ -51,7 +51,13 @@ def getDatesJson(newsdf):
             pass
         return list1
 
-
+def getallUrls(newsdf):
+    allurl = []
+    for t in range(len(newsdf)):
+        allurl.append(newsdf['resuts'][t]['published_url'])
+        
+    return allurl
+    
 def getStockprice(text):
     
     df = pandas.read_csv(f'{text}.csv')
@@ -88,12 +94,13 @@ def getProperDates(df):
         findates.append(val1[0:7])
     return findates 
 
-def getBullurlindex(bullindex,findates):
-    
-    
-    
-    
-    
+#gives matchinng dates between the final dates and Json dates and gives out relavent news
+def getRelnews(findates,list1):
+    finalIndexnews = []
+    for d in range(len(list1)):
+        if findates[d] == list1[d]:
+            finalIndexnews.append(d)
+    return finalIndexnews
    
     
 
