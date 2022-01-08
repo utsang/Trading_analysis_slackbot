@@ -17,76 +17,85 @@ from dotenv import load_dotenv
 env_path = Path('.')/ '.env'
 load_dotenv(dotenv_path=env_path)
 
-client = slack.WebClient(token=os.environ['SLACK_TOKEN'])
+def get jsonF(text):
+    api = '8fqEYrALHGQeOseKoYVp6442GRNdcFS3'
+    ticker = f'{text}'
+    limit = '1000'
+    year = '2021'
+    month = '07'
+    day = '01'
+    api_url = f'https://api.polygon.io/v2/reference/news?limit={limit}&order=descending&sort=published_utc&ticker={ticker}&published_utc.gte={year}-{month}-{day}&apiKey={api}'
+    data = requests.get(api_url).json()
+    return data
 
-client.chat_postMessage(channel='#tradingtest', text = input('Enter your Message here: '))
-
-api = '8fqEYrALHGQeOseKoYVp6442GRNdcFS3'
-ticker = 'AAPL'
-limit = '1000'
-year = '2021'
-month = '04'
-day = '05'
-api_url = f'https://api.polygon.io/v2/reference/news?limit={limit}&order=descending&sort=published_utc&ticker={ticker}&published_utc.gte={year}-{month}-{day}&apiKey={api}'
-data = requests.get(api_url).json()
-#date = (data['results'][0]['published_utc'])
+def getDfresults(data):
+    newsdf = pandas.DataFrame(data['results'])
+    return newsdf
 
 
-#first_nine = date[0:9]
-#print(first_nine)
-
-newsdf = pandas.DataFrame(data['results'])
-#print(newsdf)
-
-#print(newsdf['published_utc'])
 l = len(newsdf)
 
 for v, row in newsdf.iterrows():
     val = row['published_utc']
     newsdf.at[v,'published_utc'] = val[0:9]
 
-
-
-
-list1 = []
-date_imp = []
-
-for i in range(int(limit)):
-    try:
-         date_imp = data['results'][i]['published_utc']
-         list1.append(date_imp[0:9]) 
-    except:    
-        pass
-
-
-
-#print(list1)
-print(date_imp)
-#df = pandas.read_csv(StringIO('yahoo.csv'), sep = " ")
-df = pandas.read_csv('yahoo.csv')
-
-#print(df)
-
-df['Boolean'] = df['Open'] < df['Close']
-
-
-# secList = []
-
-# for row_name, row in df.iterrows():
+def getDatesJson(newsdf):
     
-#     if row['Boolean'] == False:
-        
-#         if list1[row_name] ==  row['Date']:
-#             print(row_name, 'Boolean is false')
-#             secList.append([row_name])
-#         else:
-#            print('No matching date found') 
-           
-
-#     else:
-#         print('Boolean is true: ', row_name)
+    list1 = []
+    date_imp = []
+    for i in range(int(limit)):
+        try:
+             date_imp = newsdf['results'][i]['published_utc']
+             list1.append(date_imp[0:7]) 
+        except:    
+            pass
+        return list1
 
 
+def getStockprice(text):
+    
+    df = pandas.read_csv(f'{text}.csv')
+    
+    return df['Close'][len(df)]
+
+def getStock(text):
+    df = pandas.read_csv(f'{text}.csv')
+
+def getBullday(df):
+    bulldayindex = []
+    df['Boolean'] = df['Open'] < df['Close']
+    for row_name, row in df.iterrows():
+       
+        if row['Boolean'] == True:
+              bulldayindex.append(row_name)
+                
+    return bulldayindex
+
+def getBearday(df):
+    beardayindex = []
+    df['Boolean'] = df['Open'] < df['Close']
+    for row_name, row in df.iterrows():
+       
+        if row['Boolean'] == False:
+              beardayindex.append(row_name)
+    return beardayindex
+#get dates from the ticker csv
+def getProperDates(df):
+    val1 = []
+    findates = []
+    for b in range(len(df)):
+        val1.append(df['Date'][b])
+        findates.append(val1[0:7])
+    return findates 
+
+def getBullurlindex(bullindex,findates):
+    
+    
+    
+    
+    
+   
+    
 
 
 # candlestick = go.Candlestick(x=df['Date'],
