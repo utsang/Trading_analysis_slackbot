@@ -64,6 +64,7 @@ def getStockprice(text):
     
     return df['Close'][len(df)]
 
+
 def getStock(text):
     df = pandas.read_csv(f'{text}.csv')
 
@@ -102,7 +103,32 @@ def getRelnews(findates,list1):
             finalIndexnews.append(d)
     return finalIndexnews
    
-    
+def getBulldates(bulldayindex,findates):
+    bulldayDates = []
+    for gg in range(len(bulldayindex)):
+        bulldayDates.append(findates[bulldayindex[gg]])
+    return bulldayDates
+
+def getBearDates(beardayindex,findates):
+    beardayDates = []
+    for ggf in range(len(beardayindex)):
+        beardayDates.append(findates[beardayindex[ggf]])
+    return beardayDates
+def bullDayurl(bulldayDates,list1,allurl):
+    bullUrl = []
+    for t in range(bulldayDates):
+        if bulldayDates[t] == list1[t]:
+            bullUrl.append(allurl[t])
+        return bullUrl
+def bearDayurl(beardayDates,list1,allurl):
+    bearUrl = []
+    for tt in range(len(beardayDates)):
+        if beardayDates[tt] == list1[tt]:
+            bearUrl.append(allurl[t])
+        return bearUrl
+            
+
+           
 
 
 # candlestick = go.Candlestick(x=df['Date'],
