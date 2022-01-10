@@ -1,23 +1,14 @@
-#TO Do check list now
-#Global variable for the ticker name so it can be accesed, play around more with plotly and matlib try and get volume data, rsi and macd for momentum analysis as well
-
-import plotly.graph_objects as go
-import pandas 
-from datetime import datetime
+import yfinance as yf
+import pandas
 import requests
 import csv
 import json
 from io import StringIO
-import slack
-import os
-from pathlib import Path
-from dotenv import load_dotenv
+#import slack
+from datetime import date
 
 
-env_path = Path('.')/ '.env'
-load_dotenv(dotenv_path=env_path)
-
-def get jsonF(text):
+def getjsonF(text):
     api = '8fqEYrALHGQeOseKoYVp6442GRNdcFS3'
     ticker = f'{text}'
     limit = '1000'
@@ -33,40 +24,40 @@ def getDfresults(data):
     return newsdf
 
 
-l = len(newsdf)
-
-for v, row in newsdf.iterrows():
-    val = row['published_utc']
-    newsdf.at[v,'published_utc'] = val[0:9]
-
 def getDatesJson(newsdf):
     
     list1 = []
     date_imp = []
-    for i in range(int(limit)):
-        try:
-             date_imp = newsdf['results'][i]['published_utc']
+    for i in range(len(newsdf)):
+             date_imp = newsdf['published_utc'][i]
              list1.append(date_imp[0:7]) 
-        except:    
-            pass
-        return list1
+    
+    return list1
 
 def getallUrls(newsdf):
     allurl = []
     for t in range(len(newsdf)):
-        allurl.append(newsdf['resuts'][t]['published_url'])
+        allurl.append(newsdf['article_url'][t])
         
     return allurl
+
+def do_something(text):
+
+      d4 = date.today()
+      tickerWant = text
+      data = yf.download(tickerWant, start="2021-09-5", end=d4)
+      data.to_csv(rf'C:\workfin\demofin\\{tickerWant}.csv') 
     
 def getStockprice(text):
     
-    df = pandas.read_csv(f'{text}.csv')
+    df = pandas.read_csv(f'C:\workfin\demofin\{text}.csv')
     
-    return df['Close'][len(df)]
+    return df['Close'][len(df)-1]
 
 
 def getStock(text):
-    df = pandas.read_csv(f'{text}.csv')
+    df = pandas.read_csv(f'C:\workfin\demofin\{text}.csv')
+    return df
 
 def getBullday(df):
     bulldayindex = []
@@ -91,19 +82,25 @@ def getProperDates(df):
     val1 = []
     findates = []
     for b in range(len(df)):
-        val1.append(df['Date'][b])
+        val1 = df['Date'][b]
         findates.append(val1[0:7])
+    
     return findates 
 
-#gives matchinng dates between the final dates and Json dates and gives out relavent news
+#gives matchinng dates between the final 
+## dates and Json dates and gives out relavent news
+
 def getRelnews(findates,list1):
     finalIndexnews = []
-    for d in range(len(list1)):
+    for d in range(0,len(findates)-1):
         if findates[d] == list1[d]:
             finalIndexnews.append(d)
+    
     return finalIndexnews
    
 def getBulldates(bulldayindex,findates):
+##This function just appends the bull day indexes found and finds them on findates which has all the dates, so 
+##from the csv file this function just gets the bull days
     bulldayDates = []
     for gg in range(len(bulldayindex)):
         bulldayDates.append(findates[bulldayindex[gg]])
@@ -116,7 +113,7 @@ def getBearDates(beardayindex,findates):
     return beardayDates
 def bullDayurl(bulldayDates,list1,allurl):
     bullUrl = []
-    for t in range(bulldayDates):
+    for t in range(len(bulldayDates)):
         if bulldayDates[t] == list1[t]:
             bullUrl.append(allurl[t])
         return bullUrl
@@ -124,22 +121,33 @@ def bearDayurl(beardayDates,list1,allurl):
     bearUrl = []
     for tt in range(len(beardayDates)):
         if beardayDates[tt] == list1[tt]:
-            bearUrl.append(allurl[t])
+            bearUrl.append(allurl[tt])
         return bearUrl
-            
 
-           
+def do_something(text):
+
+      d4 = date.today()
+      tickerWant = text
+      data = yf.download(tickerWant, start="2021-09-5", end=d4)
+      data.to_csv(rf'C:\workfin\demofin\\{tickerWant}.csv') 
 
 
-# candlestick = go.Candlestick(x=df['Date'],
-#                 open=df['Open'],
-#                 high=df['High'],
-#                 low=df['Low'],
-#                 close=df['Close'])
 
-# fig = go.Figure(data=[candlestick])
-# fig.layout.xaxis.type = 'category'
-# fig.update_layout(title_text='AAPL stock over the last year', template = 'plotly_dark')
-
-# fig.show()
-
+      ##CHECK STUFF##
+      t = getjsonF('AAPL') #return data
+# g = getDfresults(t) #pass in data, returns newsdf
+# f = getDatesJson(g) #pass in newsdf, returns list1 dates
+# hh = getallUrls(g) #retunrs list of all urls, pass in newsdf
+# stockm = do_something('AAPL') #doesn't return anything,
+## just outputs the .csv file
+# priceS = getStockprice('AAPL')
+# jusStock = getStock('AAPL') #takes in text,returns df
+# bullkoin = getBullday(jusStock) #takes in df, returns index of bullday
+# bearkodin = getBearday(jusStock) #takes in df, returns index of bear days
+# fulldates = getProperDates(jusStock) #takes in df, returns 
+# findates which is all dates formatted
+# finNews = getRelnews(fulldates,f) #takes in fulldates(dates fofrmatted from csv) and list1, dates from Json file, returns finalindexes for the all urls(example u can use the returned value from this to get the appropiate urls, so example in this u can do hh[finnews[5]])
+# bulldin = getBulldates(bullkoin,fulldates)
+# beardin = getBearDates(bearkodin,fulldates) #both of them take their respective indexes for bull/bear days and returns the date where they matched(rom the csv file this function just gets the bull days)
+# puraiBull = bullDayurl(bulldin,f,hh)
+# puraiBear = bearDayurl(beardin,f,hh)
